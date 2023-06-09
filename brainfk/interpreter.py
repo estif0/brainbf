@@ -1,67 +1,84 @@
-from argparse import ArgumentParser, Namespace
+from argparse import ArgumentParser
 
-parser = ArgumentParser(
-    prog="Brainfuck Interpreter",
-    description="The program executes brainfuck code!",
-)
-parser.add_argument(
-    "file",
-    help="Path to a file that contains brainfuck code",
-)
-args = parser.parse_args()
-try:
-    with open(args.file, "r") as file:
-        program = file.read()
-except:
-    print("could'nt read file")
-    program = input("Input the brainfuck code: ")
 
-valid_commands = ["+", "-", "<", ">", ".", ",", "[", "]"]
+def main():
+    class bf:
+        def __init__(self, file_path, program=None):
+            self.valid_commands = ["+", "-", "<", ">", ".", ",", "[", "]"]
+            self.arr = [0]
+            self.ci = 0
+            self.user_input = []
+            self.loop_table = {}
+            self.loop_stack = []
+            self.program = program
 
-arr = [0]
-ci = 0
-user_input = []
-loop_table = {}
-loop_stack = []
+            if program is None:
+                try:
+                    with open(file_path, "r") as file:
+                        self.program = file.read()
+                except:
+                    print("Could not read file")
+                    self.program = input("Input the brainfuck code: ")
 
-for ip, cmd in enumerate(program):
-    if cmd == "[":
-        loop_stack.append(ip)
-    elif cmd == "]":
-        loop_begin = loop_stack.pop()
-        loop_table[loop_begin] = ip
-        loop_table[ip] = loop_begin
+            self.create_loop_table()
 
-ip = 0
-while ip < len(program):
-    cmd = program[ip]
+        def create_loop_table(self):
+            for ip, cmd in enumerate(self.program):
+                if cmd == "[":
+                    self.loop_stack.append(ip)
+                elif cmd == "]":
+                    loop_begin = self.loop_stack.pop()
+                    self.loop_table[loop_begin] = ip
+                    self.loop_table[ip] = loop_begin
 
-    if cmd in valid_commands:
-        if cmd == "+":
-            arr[ci] += 1
-            if arr[ci] == 256:
-                arr[ci] = 0
-        elif cmd == "-":
-            arr[ci] -= 1
-            if arr[ci] == -1:
-                arr[ci] = 255
-        elif cmd == "<":
-            ci -= 1
-        elif cmd == ">":
-            ci += 1
-            if ci == len(arr):
-                arr.append(0)
-        elif cmd == ".":
-            print(chr(arr[ci]), end="")
-        elif cmd == ",":
-            if user_input == []:
-                user_input = list(input() + "\n")
-            arr[ci] = ord(user_input.pop(0))
-        elif cmd == "[":
-            if arr[ci] == 0:
-                ip = loop_table[ip]
-        elif cmd == "]":
-            if arr[ci]:
-                ip = loop_table[ip]
+        def execute(self):
+            ip = 0
+            while ip < len(self.program):
+                cmd = self.program[ip]
 
-    ip += 1
+                if cmd in self.valid_commands:
+                    if cmd == "+":
+                        self.arr[self.ci] += 1
+                        if self.arr[self.ci] == 256:
+                            self.arr[self.ci] = 0
+                    elif cmd == "-":
+                        self.arr[self.ci] -= 1
+                        if self.arr[self.ci] == -1:
+                            self.arr[self.ci] = 255
+                    elif cmd == "<":
+                        self.ci -= 1
+                    elif cmd == ">":
+                        self.ci += 1
+                        if self.ci == len(self.arr):
+                            self.arr.append(0)
+                    elif cmd == ".":
+                        print(chr(self.arr[self.ci]), end="")
+                    elif cmd == ",":
+                        if self.user_input == []:
+                            self.user_input = list(input() + "\n")
+                        self.arr[self.ci] = ord(self.user_input.pop(0))
+                    elif cmd == "[":
+                        if self.arr[self.ci] == 0:
+                            ip = self.loop_table[ip]
+                    elif cmd == "]":
+                        if self.arr[self.ci]:
+                            ip = self.loop_table[ip]
+
+                ip += 1
+
+    parser = ArgumentParser(
+        prog="Brainfuck Interpreter",
+        description="The program executes brainfuck code!",
+    )
+    parser.add_argument(
+        "file",
+        help="Path to a file that contains brainfuck code",
+    )
+    args = parser.parse_args()
+
+    interpreter = bf(args.file)
+    interpreter.execute()
+
+
+if __name__ == "__main__":
+    main()

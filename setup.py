@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="brainfk",
-    version="1.0.0",
+    version="0.0.1",
     packages=["brainfk"],
     entry_points={"console_scripts": ["brainfk = brainfk.interpreter:main"]},
     install_requires=["argparse"],
