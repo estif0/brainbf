@@ -1,3 +1,7 @@
 /build
 main.py
 test.bf
+README.txt
+/brainfk.egg-info
+/tests
+/dist/
